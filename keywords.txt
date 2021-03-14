@@ -1,0 +1,6 @@
+MqttSecureConnection	KEYWORD1
+publish	KEYWORD2
+setupConnection	KEYWORD2
+keepConnection	KEYWORD2
+nodemcu-mqtt-secure-connection.h	KEYWORD1
+nodemcu-mqtt-secure-connection-config.h	KEYWORD1
