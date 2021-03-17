@@ -80,6 +80,8 @@ const int MQTT_PUB_QOS = 2;
 const int MQTT_SUB_QOS = 2;
 const bool MQTT_RETAINED = true;
 const bool MQTT_NOT_RETAINED = false;
+// Size of the buffers to publish and receive messages.
+const unsigned int MQTT_BUFFER_SIZE = 128; 
 // MQTT LAST WILL AND TESTAMENT CONFIG
 const char MQTT_LWT_TOPIC_ROOT[] = "devices/fromdevice";
 const char MQTT_LWT_MESSAGE[] = "El dispositivo se ha desconectado";

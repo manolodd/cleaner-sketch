@@ -38,7 +38,7 @@ class MqttSecureConnection {
   private:
     const unsigned long MAX_UNSIGNED_LONG = 4294967295; // Max millis() before starting at 0.
     BearSSL::WiFiClientSecure tlsConnection;
-    MQTTClient mqtt_client;
+    MQTTClient mqtt_client(MQTT_BUFFER_SIZE);
     unsigned long lastMillis;
     unsigned long lastMillisNTP;
     String upTime;
