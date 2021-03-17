@@ -22,7 +22,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <nodemcu-mqtt-secure-connection.h>
+#include "nodemcu-mqtt-secure-connection.h"
 
 MqttSecureConnection::MqttSecureConnection() {
   lastMillis = 0;

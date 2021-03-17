@@ -1,7 +1,6 @@
 #include <nodemcu-mqtt-secure-connection.h>
 #include <nodemcu-mqtt-secure-connection-config.h>
 
-
 // Create an object of type MqttSecureConnection. This object
 // includes the needed logic to connect to a WiFi network,
 // auto-reconnect if it is disconnected, connect via TLS to

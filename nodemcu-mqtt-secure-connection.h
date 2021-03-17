@@ -31,7 +31,7 @@
 #include <WiFiClientSecure.h> // https://bearssl.org/ --> MIT
 #include <time.h>
 #include <Arduino.h>
-#include <nodemcu-mqtt-secure-connection-config.h>
+#include "nodemcu-mqtt-secure-connection-config.h"
 
 
 class MqttSecureConnection {
