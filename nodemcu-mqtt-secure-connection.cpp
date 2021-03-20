@@ -22,12 +22,11 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "nodemcu-mqtt-secure-connection.h"
+#include <nodemcu-mqtt-secure-connection.h>
 
 MqttSecureConnection::MqttSecureConnection() {
-  lastMillis = 0;
-  lastMillisNTP = 0;
-  upTime = "";
+  _upTime = "";
+  _ntpController.setInterval(NTP_SYNCHRONIZATION_PERIOD); 
 }
 
 String MqttSecureConnection::getDeviceID() {
@@ -75,13 +74,13 @@ void MqttSecureConnection::mqtt_connect() {
   char sub_topic[getSubTopic().length() + 1];
   char lwt_topic[getLWTPubTopic().length() + 1];
   getLWTPubTopic().toCharArray(lwt_topic, getLWTPubTopic().length() + 1);
-  mqtt_client.setOptions(MQTT_KEEPALIVE, MQTT_CLEAN_SESSION, MQTT_TIMEOUT);
-  mqtt_client.setWill(lwt_topic, MQTT_LWT_MESSAGE, MQTT_LWT_NOT_RETAINED, MQTT_LWT_PUB_QOS);
-  if (!mqtt_client.connected()) {
+  _mqttClient.setOptions(MQTT_KEEPALIVE, MQTT_CLEAN_SESSION, MQTT_TIMEOUT);
+  _mqttClient.setWill(lwt_topic, MQTT_LWT_MESSAGE, MQTT_LWT_NOT_RETAINED, MQTT_LWT_PUB_QOS);
+  if (!_mqttClient.connected()) {
     getDeviceID().toCharArray(deviceID, getDeviceID().length() + 1);
     getSubTopic().toCharArray(sub_topic, getSubTopic().length() + 1);
     Serial.print("Connecting to MQTT broker using TLS...");
-    if (!mqtt_client.connect(deviceID)) {
+    if (!_mqttClient.connect(deviceID)) {
       Serial.println(" Unable to connect to the MQTT broker");
       delay(500);
     } else {
@@ -89,7 +88,7 @@ void MqttSecureConnection::mqtt_connect() {
       Serial.print("Subscribing to topic ");
       Serial.print(sub_topic);
       Serial.print("...");
-      if (!mqtt_client.subscribe(sub_topic, MQTT_SUB_QOS)) {
+      if (!_mqttClient.subscribe(sub_topic, MQTT_SUB_QOS)) {
         Serial.print(" Unable to subscribe to the topic!");
         delay(500);
       } else {
@@ -179,12 +178,12 @@ void MqttSecureConnection::setupNTPTime() {
 void MqttSecureConnection::setupMQTT(MQTTClientCallbackSimple onMessageCallbackFunction) {
   checkConnectivity();
   BearSSL::X509List x509_ca_cert(MQTT_BROKER_CA_CERT);
-  tlsConnection.setTrustAnchors(&x509_ca_cert);
-  tlsConnection.setInsecure();
-  tlsConnection.setSSLVersion(MIN_TLS_VERSION, MAX_TLS_VERSION);
-  mqtt_client.begin(MQTT_HOST, MQTT_PORT, tlsConnection);
+  _tlsConnection.setTrustAnchors(&x509_ca_cert);
+  _tlsConnection.setInsecure();
+  _tlsConnection.setSSLVersion(MIN_TLS_VERSION, MAX_TLS_VERSION);
+  _mqttClient.begin(MQTT_HOST, MQTT_PORT, _tlsConnection);
   if (onMessageCallbackFunction) {
-    mqtt_client.onMessage(onMessageCallbackFunction);
+    _mqttClient.onMessage(onMessageCallbackFunction);
   }
   mqtt_connect();
 }
@@ -194,8 +193,8 @@ void MqttSecureConnection::publishMQTTMessage(String messageToPublish) {
   char message[messageToPublish.length() + 1];
   getPubTopic().toCharArray(pub_topic, getPubTopic().length() + 1);
   messageToPublish.toCharArray(message, messageToPublish.length() + 1);
-  if (WiFi.isConnected() && mqtt_client.connected()) {
-    if (!mqtt_client.publish(pub_topic, message, MQTT_NOT_RETAINED, MQTT_PUB_QOS)) {
+  if (WiFi.isConnected() && _mqttClient.connected()) {
+    if (!_mqttClient.publish(pub_topic, message, MQTT_NOT_RETAINED, MQTT_PUB_QOS)) {
       Serial.println("Cannot publish right now");
     } else {
       Serial.print("Publishing [");
@@ -213,18 +212,16 @@ void MqttSecureConnection::publishMQTTMessage(String messageToPublish) {
 
 void MqttSecureConnection::publish(String messageToPublish) {
   checkConnectivity();
-  if (isTimeToPublish()) {
-    publishMQTTMessage(messageToPublish);
-  }
+  publishMQTTMessage(messageToPublish);
 }
 
 void MqttSecureConnection::publishMQTTUpTime() {
   char pub_topic[getUptimePubTopic().length() + 1];
-  char message[upTime.length() + 1];
+  char message[_upTime.length() + 1];
   getUptimePubTopic().toCharArray(pub_topic, getUptimePubTopic().length() + 1);
-  upTime.toCharArray(message, upTime.length() + 1);
-  if (WiFi.isConnected() && mqtt_client.connected()) {
-    if (!mqtt_client.publish(pub_topic, message, MQTT_RETAINED, MQTT_PUB_QOS)) {
+  _upTime.toCharArray(message, _upTime.length() + 1);
+  if (WiFi.isConnected() && _mqttClient.connected()) {
+    if (!_mqttClient.publish(pub_topic, message, MQTT_RETAINED, MQTT_PUB_QOS)) {
       Serial.println("Cannot publish right now");
     } else {
       Serial.print("Publishing [");
@@ -240,58 +237,28 @@ void MqttSecureConnection::publishMQTTUpTime() {
   }
 }
 
-bool MqttSecureConnection::isTimeToPublish() {
-  unsigned long currentMillis;
-  unsigned long period;
-  currentMillis = millis();
-  if (currentMillis < lastMillis) {
-    period = MAX_UNSIGNED_LONG - lastMillis + currentMillis;
-  } else {
-    period = currentMillis - lastMillis;
-  }
-  if (period >= DATA_PUBLISH_INTERVAL) {
-    lastMillis = millis();
-    return true;
-  }
-  return false;
-}
-
-bool MqttSecureConnection::isTimeToSynchronizeTime() {
-  unsigned long currentMillis;
-  unsigned long period;
-  currentMillis = millis();
-  if (currentMillis < lastMillisNTP) {
-    period = MAX_UNSIGNED_LONG - lastMillisNTP + currentMillis;
-  } else {
-    period = currentMillis - lastMillisNTP;
-  }
-  if (period >= NTP_SYNCHRONIZATION_PERIOD) {
-    lastMillisNTP = millis();
-    return true;
-  }
-  return false;
-}
-
 String MqttSecureConnection::measureTime() {
   time_t currentTime = time(nullptr);
   return String(currentTime);
 }
 
 void MqttSecureConnection::setupConnection(MQTTClientCallbackSimple onMessageCallbackFunction) {
-  Serial.begin(115200);
-  delay (1000);
+  if (!Serial) {
+    Serial.begin(115200);
+    delay (1000);
+  }
   setupWiFi();
   setupNTPTime();
-  upTime = measureTime();
+  _upTime = measureTime();
   setupMQTT(onMessageCallbackFunction);
   publishMQTTUpTime();
 }
 
 void MqttSecureConnection::keepConnection() {
-  if (isTimeToSynchronizeTime()) {
+  if (_ntpController.isTimeToWork()) {
     setupNTPTime();
   }
   // Receive data if needed and maintain MQTT connection
-  mqtt_client.loop();
+  _mqttClient.loop();
   delay(10);
 }

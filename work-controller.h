@@ -22,47 +22,23 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _NODEMCU_MQTT_SECURE_CONNECTION_H_
-#define _NODEMCU_MQTT_SECURE_CONNECTION_H_
+#ifndef _WORK_CONTROLLER_H_
+#define _WORK_CONTROLLER_H_
 
-#include <MQTTClient.h> // https://github.com/256dpi/arduino-mqtt --> MIT
-#include <MQTT.h> // https://github.com/256dpi/arduino-mqtt --> MIT
-#include <ESP8266WiFi.h> // https://github.com/esp8266/Arduino --> LGPL-2.1-or-later
-#include <WiFiClientSecure.h> // https://bearssl.org/ --> MIT
 #include <time.h>
 #include <Arduino.h>
-#include <nodemcu-mqtt-secure-connection-config.h>
-#include <work-controller.h>
 
-class MqttSecureConnection {
+class WorkController {
   private:
+    const unsigned int DEFAULT_INTERVAL = 5000;
     const unsigned long MAX_UNSIGNED_LONG = 4294967295; // Max millis() before starting at 0.
-    BearSSL::WiFiClientSecure _tlsConnection;
-    MQTTClient _mqttClient;
-    WorkController _ntpController;
-    unsigned long _lastMillisNTP;
-    String _upTime;
-   
-    void publishMQTTUpTime();
-    String measureTime();
-    void setupWiFi();
-    void setupNTPTime();
-    void setupMQTT(MQTTClientCallbackSimple onMessageCallbackFunction);
-    String getDeviceID();
-    String getSubTopic();
-    String getPubTopic();
-    String getLWTPubTopic();
-    String getUptimePubTopic();
-    void mqtt_connect();
-    void checkConnectivity();
-    void checkMQTT();
-    void onMessageReceived(String &topic, String &payload);
-    void publishMQTTMessage(String messageToPublish);
+    unsigned long _lastMillis;
+    unsigned long _interval;
   public:
-    MqttSecureConnection();
-    void publish(String messageToPublish);
-    void setupConnection(MQTTClientCallbackSimple onMessageCallbackFunction);
-    void keepConnection();
+    WorkController(unsigned long interval);
+    WorkController(void);
+    void setInterval(unsigned long interval);
+    bool isTimeToWork();
 };
 
 #endif

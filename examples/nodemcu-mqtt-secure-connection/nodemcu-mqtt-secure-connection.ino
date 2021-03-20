@@ -1,5 +1,4 @@
-#include <nodemcu-mqtt-secure-connection.h>
-#include <nodemcu-mqtt-secure-connection-config.h>
+#include <cleaner-sketch.h>
 
 // Create an object of type MqttSecureConnection. This object
 // includes the needed logic to connect to a WiFi network,
@@ -11,7 +10,9 @@
 // Everything is done automatically by using only two or
 // three methods. Logs are dumped to Serial.
 
+CleanerSketch cleanerSketch;
 MqttSecureConnection internet;
+WorkController timestampController(5000); // each 5 seconds...
 
 
 // Create a function to handle incoming MQTT messages if you
@@ -25,15 +26,26 @@ void onMessageReceived(String &topic, String &payload) {
   Serial.println(payload);
 }
 
-// This is a dummy function. Your sketch will do the work
-// in the way you think is better.
-String doAnyWork() {
-  time_t currentTime = time(nullptr);
-  return String(currentTime);
+// This is a dummy function that gets the system time and prints
+// it to Serial. Your sketch will do the work in the way you 
+// think is better.
+void measureAndPublishTime() {
+  if (timestampController.isTimeToWork()) {
+    time_t currentTime = time(nullptr);
+    String measuredTime = String(currentTime);
+    // Whenever you have a result you want to publish, do it
+    // usgin the publish() method of your MqttSecureConnection
+    // object. It will be published only if is time to publish
+    // as configured in the MqttSecureConnection class. So
+    // you don't have to write here the typical check
+    // if (millis() - lastMillis > 10000)...
+    internet.publish(measuredTime);
+  }
 }
 
 
 void setup() {
+  cleanerSketch.begin();
 // Start your MqttSecureConnection object at the beginning of 
 // the setup() function. You can pass nullptr as an argument
 // if you are not going to subscribe to any MQTT topic and,
@@ -49,15 +61,7 @@ void setup() {
 void loop() {
   // Do work. And do it the way you want as you think better
   // fits your needs.
-  String workResult = doAnyWork();
-
-  // Whenever you have a result you want to publish, do it
-  // usgin the publish() method of your MqttSecureConnection
-  // object. It will be published only if is time to publish
-  // as configured in the MqttSecureConnection class. So
-  // you don't have to write here the typical check
-  // if (millis() - lastMillis > 10000)...
-  internet.publish(workResult);
+  measureAndPublishTime();
 
   // At the end of loop(), put always a call to the 
   // keepConnection() method of MqttSecureConnection. It will

@@ -1,5 +1,12 @@
-MqttSecureConnection    KEYWORD1
-publish KEYWORD2
-setupConnection KEYWORD2
-keepConnection  KEYWORD2
-nodemcu-mqtt-secure-connection.h    KEYWORD1
+MqttSecureConnection	KEYWORD1
+publish	KEYWORD2
+setupConnection	KEYWORD2
+keepConnection	KEYWORD2
+nodemcu-mqtt-secure-connection.h	KEYWORD1
+WorkController	KEYWORD1
+setInterval	KEYWORD2
+isTimeToWork	KEYWORD2
+work-controller.h	KEYWORD1
+cleaner-sketch.h	KEYWORD1
+CleanerSketch	KEYWORD1
+begin	KEYWORD2
