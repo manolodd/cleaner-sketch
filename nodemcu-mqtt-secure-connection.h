@@ -61,6 +61,7 @@ class MqttSecureConnection {
   public:
     MqttSecureConnection();
     void publish(String messageToPublish);
+    void setupConnection();
     void setupConnection(MQTTClientCallbackSimple onMessageCallbackFunction);
     void keepConnection();
 };

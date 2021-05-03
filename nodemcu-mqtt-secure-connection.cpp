@@ -254,6 +254,18 @@ void MqttSecureConnection::setupConnection(MQTTClientCallbackSimple onMessageCal
   publishMQTTUpTime();
 }
 
+void MqttSecureConnection::setupConnection() {
+  if (!Serial) {
+    Serial.begin(115200);
+    delay (1000);
+  }
+  setupWiFi();
+  setupNTPTime();
+  _upTime = measureTime();
+  setupMQTT(nullptr);
+  publishMQTTUpTime();
+}
+
 void MqttSecureConnection::keepConnection() {
   if (_ntpController.isTimeToWork()) {
     setupNTPTime();

@@ -25,12 +25,12 @@
 #include "work-controller.h"
 
 WorkController::WorkController(unsigned long interval) {
-  _lastMillis = millis();
+  _lastMillis = millis()+interval;
   _interval = interval;
 }
 
 WorkController::WorkController(void) {
-  _lastMillis = millis();
+  _lastMillis = millis()+DEFAULT_INTERVAL;
   _interval = DEFAULT_INTERVAL;
 }
 
