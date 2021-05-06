@@ -22,34 +22,44 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "work-controller.h"
+#include "non-blocking-countdown.h"
 
-WorkController::WorkController(unsigned long interval) {
-    _lastMillis = millis()+interval;
+NonBlockingCountdown::NonBlockingCountdown(unsigned long interval) {
+    _lastMillis = millis();
     _interval = interval;
 }
 
-WorkController::WorkController(void) {
-    _lastMillis = millis()+DEFAULT_INTERVAL;
-    _interval = DEFAULT_INTERVAL;
+void NonBlockingCountdown::reset() {
+    _lastMillis = millis();
 }
 
-bool WorkController::isTimeToWork() {
+void NonBlockingCountdown::delay() {
     unsigned long currentMillis;
     unsigned long computedPeriod;
-    currentMillis = millis();
-    if (currentMillis < _lastMillis) {
-        computedPeriod = MAX_UNSIGNED_LONG - _lastMillis + currentMillis;
-    } else {
-        computedPeriod = currentMillis - _lastMillis;
-    }
-    if (computedPeriod >= _interval) {
-        _lastMillis = millis();
-        return true;
-    }
-    return false;
+	reset();
+	do {
+		currentMillis = millis();
+		if (currentMillis < _lastMillis) {
+			computedPeriod = MAX_UNSIGNED_LONG - _lastMillis + currentMillis;
+		} else {
+			computedPeriod = currentMillis - _lastMillis;
+		}
+		ESP.wdtFeed();
+	} while (computedPeriod <= _interval);
 }
 
-void WorkController::setInterval(unsigned long interval) {
-    _interval = interval;
+boolean NonBlockingCountdown::countFinished() {
+    unsigned long currentMillis;
+    unsigned long computedPeriod;
+	currentMillis = millis();
+	if (currentMillis < _lastMillis) {
+		computedPeriod = MAX_UNSIGNED_LONG - _lastMillis + currentMillis;
+	} else {
+		computedPeriod = currentMillis - _lastMillis;
+	}
+	ESP.wdtFeed();
+	if (computedPeriod <= _interval) {
+		return false;
+	}
+	return true;
 }

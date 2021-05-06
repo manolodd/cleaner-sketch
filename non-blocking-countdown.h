@@ -22,23 +22,22 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _WORK_CONTROLLER_H_
-#define _WORK_CONTROLLER_H_
+#ifndef _NON_BLOCKING_COUNTDOWN_H_
+#define _NON_BLOCKING_COUNTDOWN_H_
 
 #include <time.h>
 #include <Arduino.h>
 
-class WorkController {
+class NonBlockingCountdown {
 private:
-    const unsigned int DEFAULT_INTERVAL = 5000;
     const unsigned long MAX_UNSIGNED_LONG = 4294967295; // Max millis() before starting at 0.
     unsigned long _lastMillis;
-    unsigned long _interval;
+	unsigned long _interval;
 public:
-    WorkController(unsigned long interval);
-    WorkController(void);
-    void setInterval(unsigned long interval);
-    bool isTimeToWork();
+    NonBlockingCountdown(unsigned long interval);
+    void delay();
+    bool countFinished();
+	void reset();
 };
 
 #endif

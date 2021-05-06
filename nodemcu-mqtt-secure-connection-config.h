@@ -31,6 +31,10 @@ const char WIFI_PASS[] = "%m4n010y313n4%c14v3%2016%";
 const int WIFI_ATTEMPTS_BEFORE_RESETTING_ON_CONNECT = 15;
 const int WIFI_ATTEMPTS_BEFORE_RESETTING_ON_RECONNECT = 30;
 
+//OTA
+const char OTA_PREFIX[] = "lechuga";
+const char OTA_PASSWORD[] = "123";
+
 // MQTT
 // MQTT BROKER CONFIG
 const char MQTT_HOST[] = "192.168.1.20";
@@ -64,35 +68,40 @@ CJsp1/ztj+lfiSsyezhADbtlmAkx72rp6LCaCY2I3JPHVrmakN8xHT84KP9RUmj6
 +WWS7aY4TTdLX/rc0zJv591uDDBXe98z/g4NvDg=
 -----END CERTIFICATE-----
 )EOF";
-const int MQTT_KEEPALIVE = 5; // seconds
+const int MQTT_KEEPALIVE = 10; // seconds
 const int MQTT_CLEAN_SESSION = true;
 const int MQTT_NOT_CLEAN_SESSION = false;
 // MQTT_TIMEOUT is the timeout(in milliseconds) used by all
 // MQTT commands, that return a boolean, before ending
 // with due to not being able to perform the operation.
-const int MQTT_TIMEOUT = 2000; // milliseconds
+const int MQTT_TIMEOUT = 3000; // milliseconds
+// MQTT buffer size for pub/sub operations
+const unsigned int MQTT_BUFFER_SIZE = 128;
 // MQTT CLIENT, PUBLISH AND SUBSCRIBE CONFIG
 const char MQTT_CLIENT_PREFIX[] = "nodemcu";
 const char MQTT_SUB_TOPIC_ROOT[] = "devices/todevice";
 const char MQTT_PUB_TOPIC_ROOT[] = "devices/fromdevice";
 const char MQTT_UPTIME_PUB_TOPIC_ROOT[] = "devices/uptime";
-const int MQTT_PUB_QOS = 2;
-const int MQTT_SUB_QOS = 2;
+const int MQTT_PUB_QOS = 1;
+const int MQTT_SUB_QOS = 1;
 const bool MQTT_RETAINED = true;
 const bool MQTT_NOT_RETAINED = false;
+// MQTT STATUS
+const char STATUS_CONNECTED[] = "{\"status\":0}";
+const char STATUS_SLEEPING[] = "{\"status\":1}";
 // MQTT LAST WILL AND TESTAMENT CONFIG
 const char MQTT_LWT_TOPIC_ROOT[] = "devices/fromdevice";
-const char MQTT_LWT_MESSAGE[] = "El dispositivo se ha desconectado";
+const char MQTT_LWT_MESSAGE[] = "{\"status\":2}";
 const bool MQTT_LWT_RETAINED = true;
 const bool MQTT_LWT_NOT_RETAINED = false;
-const int MQTT_LWT_PUB_QOS = 2;
-
+const int MQTT_LWT_PUB_QOS = 1;
 // DATA PUBLISH FREQUENCY
 const int DATA_PUBLISH_INTERVAL = 5000;
-
 // Period of time before synchronizing again
 // the time via NTP.
 const unsigned long NTP_SYNCHRONIZATION_PERIOD = 21600000; // 21600000 milliseconds (6 hours).
+// Baud rate for Serial communication
+const unsigned int DEFAULT_BAUDS = 115200;
 
 #endif
  
