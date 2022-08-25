@@ -55,7 +55,7 @@ void setup() {
 // you should specify it here.
 //
 //  internet.setupConnection(nullptr);
-  internet.setupConnection(onMessageReceived);
+  internet.setupConnection(onMessageReceived, "MyDesiredOTAHostname");
 }
 
 void loop() {
@@ -65,7 +65,7 @@ void loop() {
 
   // At the end of loop(), put always a call to the 
   // keepConnection() method of MqttSecureConnection. It will
-  // maintain MQTT connectin in a dood state, and also do
+  // maintain MQTT connectin in a good state, and also do
   // some checks.
   internet.keepConnection();
 }

@@ -28,6 +28,10 @@ MqttSecureConnection::MqttSecureConnection() {
     _upTime = "";
     _ntpController.setInterval(NTP_SYNCHRONIZATION_PERIOD); 
     _mqttClient = MQTTClient(MQTT_BUFFER_SIZE);
+	_gracefulDisconnect = false;
+	_otaStatus = false;
+	_latestNTPEpoch = EPOCH_01_01_2021;
+	_otaHostname = "";
 }
 
 String MqttSecureConnection::getDeviceID() {
@@ -84,9 +88,12 @@ void MqttSecureConnection::mqtt_connect() {
         if (!_mqttClient.connect(deviceID)) {
             printlnIfSerial(" Unable to connect to the MQTT broker");
         } else {
-            
-            // Proof
-            String msg = String(STATUS_CONNECTED);
+			String msg;
+			if (_otaStatus) {
+				msg = String(STATUS_OTA);
+			} else {
+				msg = String(STATUS_CONNECTED);
+			}
             char pub_topic[getPubTopic().length() + 1];
             char message[msg.length() + 1];
             getPubTopic().toCharArray(pub_topic, getPubTopic().length() + 1);
@@ -103,8 +110,6 @@ void MqttSecureConnection::mqtt_connect() {
                     printlnIfSerial(" Published!");
                 }
             }		
-            //////////
-            
             printlnIfSerial(" Connected to the MQTT broker!");
             printIfSerial("Subscribing to topic ");
             printIfSerial(sub_topic);
@@ -180,33 +185,29 @@ void MqttSecureConnection::setupWiFi() {
 void MqttSecureConnection::setupNTPTime() {
     int attempts = 0;
     // NTP (Required to use TPLS 1.2)
-    // I prefer to use UTC time without offset and use it
-    // in the backend as needed.
-    const int ZONE_OFFSET = 0;  // Seconds. No offset. UTC time instead.
-    const int DAY_LIGHT_OFFSET_SEC = 0; // Seconds. No daylight offset. Plain UTC time instead.
-    const int EPOCH_01_01_2021 = 1609459200; // Millis from January 1st, 2021
     const char NTP_SERVER_1[] = "0.es.pool.ntp.org";
     const char NTP_SERVER_2[] = "pool.ntp.org";
     const char NTP_SERVER_3[] = "time.nist.gov";
     checkConnectivity();
     printIfSerial("Synchronizing time via NTP");
-    configTime(ZONE_OFFSET, DAY_LIGHT_OFFSET_SEC, NTP_SERVER_1, NTP_SERVER_2, NTP_SERVER_3);
+    configTime(TIMEZONE, NTP_SERVER_1, NTP_SERVER_2, NTP_SERVER_3);
     // This loop is needed because is common that some attempts to retrieve
     // current time return errors. So we can assure that once the returned
     // time is greater than 01/01/2021 00:00:00 is because the correct one
     // is retrieved. Put the epoch value you need but always a past one.
-    while (time(nullptr) < EPOCH_01_01_2021) {
+    while (time(nullptr) < _latestNTPEpoch) {
         attempts++;
         if ((attempts % 100) == 0) {
             printIfSerial(".");
         }
         delay(10);
     }
+    _latestNTPEpoch = time(nullptr);
     printlnIfSerial(" Synchronized!");
 }
 
 void MqttSecureConnection::setupOTA() {
-    String otaHostname = String(OTA_PREFIX);
+	String otaHostname = String(_otaHostname);
     otaHostname += "-";
     otaHostname += getDeviceID();
     int hostnameLength = otaHostname.length() + 1;
@@ -214,7 +215,7 @@ void MqttSecureConnection::setupOTA() {
     otaHostname.toCharArray(charArrayOTAHostname, hostnameLength);
     ArduinoOTA.setHostname(charArrayOTAHostname);
     printlnIfSerial(charArrayOTAHostname);
-    ArduinoOTA.setPassword(OTA_PASSWORD);
+    ArduinoOTA.setPasswordHash(OTA_PASSWORD);
     printlnIfSerial("Iniciando OTA...");
     ArduinoOTA.begin();
     printlnIfSerial("OTA iniciado");
@@ -296,6 +297,16 @@ String MqttSecureConnection::measureTime() {
     return String(currentTime);
 }
 
+void MqttSecureConnection::setupConnection(MQTTClientCallbackSimple onMessageCallbackFunction, String otaHostname) {
+	_otaHostname = String(otaHostname);
+    setupWiFi();
+    setupNTPTime();
+    _upTime = measureTime();
+    setupMQTT(onMessageCallbackFunction);
+    publishMQTTUpTime();
+}
+
+
 void MqttSecureConnection::setupConnection(MQTTClientCallbackSimple onMessageCallbackFunction) {
     setupWiFi();
     setupNTPTime();
@@ -335,6 +346,18 @@ void MqttSecureConnection::gracefulDisconnect() {
         }
     }
 }
+
+void MqttSecureConnection::setOTAStatus(bool otaStatus) {
+	_otaStatus = otaStatus;
+	String msg;
+	if (_otaStatus) {
+		msg = String(STATUS_OTA);
+	} else {
+		msg = String(STATUS_CONNECTED);
+	}
+	publish(msg);
+}
+
 
 void MqttSecureConnection::printIfSerial(String txt) {
     if(Serial) {

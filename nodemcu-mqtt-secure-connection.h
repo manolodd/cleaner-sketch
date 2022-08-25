@@ -31,7 +31,9 @@
 #include <ESP8266mDNS.h> // https://github.com/arduino/esp8266/blob/master/libraries/ESP8266mDNS  --> LGPL-2.1-or-later
 #include <ArduinoOTA.h> // https://github.com/jandrassy/ArduinoOTA --> LGPL-2.1-only
 #include <WiFiClientSecure.h> // https://bearssl.org/ --> MIT
+//#include <Time.h> // https://github.com/PaulStoffregen/Time
 #include <time.h>
+#include <TZ.h>
 #include <Arduino.h>
 #include <nodemcu-mqtt-secure-connection-config.h>
 #include <work-controller.h>
@@ -39,12 +41,16 @@
 class MqttSecureConnection {
 private:
     const unsigned long MAX_UNSIGNED_LONG = 4294967295; // Max millis() before starting at 0.
+	const int EPOCH_01_01_2021 = 1609459200; // Millis from January 1st, 2021
     BearSSL::WiFiClientSecure _tlsConnection;
     MQTTClient _mqttClient;
     WorkController _ntpController;
     unsigned long _lastMillisNTP;
     String _upTime;
     bool _gracefulDisconnect;
+	bool _otaStatus;
+	String _otaHostname;
+	int _latestNTPEpoch;
     
     void publishMQTTUpTime();
     String measureTime();
@@ -71,8 +77,10 @@ public:
     void debug(String messageToPublish);
     void setupConnection();
     void setupConnection(MQTTClientCallbackSimple onMessageCallbackFunction);
+    void setupConnection(MQTTClientCallbackSimple onMessageCallbackFunction, String otaHostname);
     void keepConnection();
     void gracefulDisconnect();
+	void setOTAStatus(bool otaStatus);
 };
 
 #endif

@@ -25,6 +25,9 @@
 #ifndef _NODEMCU_MQTT_SECURE_CONNECTION_CONFIG_H_
 #define _NODEMCU_MQTT_SECURE_CONNECTION_CONFIG_H_
 
+// NTP date and time
+#define TIMEZONE TZ_Europe_Madrid // As declared in https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h
+
 // WiFi
 const char WIFI_SSID[] = "MECNET";
 const char WIFI_PASS[] = "%m4n010y313n4%c14v3%2016%";
@@ -32,8 +35,7 @@ const int WIFI_ATTEMPTS_BEFORE_RESETTING_ON_CONNECT = 15;
 const int WIFI_ATTEMPTS_BEFORE_RESETTING_ON_RECONNECT = 30;
 
 //OTA
-const char OTA_PREFIX[] = "lechuga";
-const char OTA_PASSWORD[] = "123";
+const char OTA_PASSWORD[] = "33106cc3e8d3d27291b449ef830a1dad";
 
 // MQTT
 // MQTT BROKER CONFIG
@@ -89,6 +91,7 @@ const bool MQTT_NOT_RETAINED = false;
 // MQTT STATUS
 const char STATUS_CONNECTED[] = "{\"status\":0}";
 const char STATUS_SLEEPING[] = "{\"status\":1}";
+const char STATUS_OTA[] = "{\"status\":3}";
 // MQTT LAST WILL AND TESTAMENT CONFIG
 const char MQTT_LWT_TOPIC_ROOT[] = "devices/fromdevice";
 const char MQTT_LWT_MESSAGE[] = "{\"status\":2}";
