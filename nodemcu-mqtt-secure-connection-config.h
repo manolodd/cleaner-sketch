@@ -25,21 +25,21 @@
 #ifndef _NODEMCU_MQTT_SECURE_CONNECTION_CONFIG_H_
 #define _NODEMCU_MQTT_SECURE_CONNECTION_CONFIG_H_
 
-// NTP date and time
+// NTP date and time. Change TimeZone as needed
 #define TIMEZONE TZ_Europe_Madrid // As declared in https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h
 
 // WiFi
-const char WIFI_SSID[] = "MECNET";
-const char WIFI_PASS[] = "%m4n010y313n4%c14v3%2016%";
+const char WIFI_SSID[] = "YOUR SSID";
+const char WIFI_PASS[] = "YOUR WIFI PASSWORD";
 const int WIFI_ATTEMPTS_BEFORE_RESETTING_ON_CONNECT = 15;
 const int WIFI_ATTEMPTS_BEFORE_RESETTING_ON_RECONNECT = 30;
 
-//OTA
-const char OTA_PASSWORD[] = "33106cc3e8d3d27291b449ef830a1dad";
+//OTA pasword hash
+const char OTA_PASSWORD[] = "33106cc3e8d06cc3d27291b449ef830d";
 
 // MQTT
 // MQTT BROKER CONFIG
-const char MQTT_HOST[] = "192.168.1.20";
+const char MQTT_HOST[] = "XXX.XXX.XXX.XXX";
 const int MQTT_PORT = 8883;
 // MQTT CONNECTION CONFIG
 const char MQTT_USER[] = ""; // leave blank if no credentials used
@@ -57,7 +57,7 @@ MSwwKgYJKoZIhvcNAQkBFh1pbmdlbmllcm9AbWFub2xvZG9taW5ndWV6LmNvbTCC
 ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALGcVhXuBhT1K5akseE6pIND
 mTseS34jicNVABbLBCcsdr6kP7C1ppajrWN570dqYyMw+bnvDYlVF1Cv/mKq48y1
 vgn9w2vv+gRw4qFD6JJ3USQ81cOKsJMtsCsGTxvfjSb3yU4mbQgxQy6407a6SuoK
-sFky/Wt1TDRWka9OpUOKxk6Zpe6gDZaUElzBuo4oTa6D4j72Sl0/7LsFDUk8M7zU
+sFky/Wt1TDRWka9OpUO YOUR CERTIFICATE HERE hbm9sb2Rvhbm9sb2RvM7zU
 q/F7t94mHDeLE71HLuptRET6kuOsDNOPjs2C4WHNt/B8hc5hZha5lHbNigbJ/lJL
 vYTTe45/qxEYYbBd2eYnWADCx5nnILSpUmpuBVonYkYUxJtu9i17Ao9N/pNb/scC
 AwEAAaNTMFEwHQYDVR0OBBYEFMrLkGR/TURg4Jq73n0B4Fg08P3sMB8GA1UdIwQY
